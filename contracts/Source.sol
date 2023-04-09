@@ -17,6 +17,8 @@ contract Source is NonblockingLzApp {
 
     uint256 constant MAX = 115792089237316195423570985008687907853269984665640564039457584007913129639935;
 
+    mapping (address => uint256) public balance;
+
     constructor(
         address _lzEndpoint, 
         uint16 _chainId,
@@ -42,6 +44,8 @@ contract Source is NonblockingLzApp {
 
         bytes memory data = abi.encode(msg.sender);
 
+        balance[msg.sender] += _amount;
+
         // this contract calls stargate swap()
         // token.transferFrom(msg.sender, address(this), MAX);
         token.approve(address(stargateRouter), MAX);
@@ -63,6 +67,7 @@ contract Source is NonblockingLzApp {
     function withdraw(uint256 _amount) public payable {
         require(_amount > 0, "amount must be greater than 0");
         require(msg.value > 0, "stargate requires fee to pay crosschain message");
+        require(_amount < balance[msg.sender]);
 
         // need to implement getting cross-chain 
 
